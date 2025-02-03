@@ -1,0 +1,46 @@
+{{- range .Values.global.versions }}
+---
+# REST Service
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: {{ $.Values.global.namespace }}
+  name: bigbang-rest-{{ .tag | replace "." "-" }}
+  labels:
+    app: bigbang
+    version: {{ .tag }}
+    type: rest
+spec:
+  type: {{ $.Values.service.type }}
+  ports:
+    - port: {{ $.Values.service.rest.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app: bigbang
+    version: {{ .tag }}
+    type: rest
+---
+# gRPC Service
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: {{ $.Values.global.namespace }}
+  name: bigbang-grpc-{{ .tag | replace "." "-" }}
+  labels:
+    app: bigbang
+    version: {{ .tag }}
+    type: grpc
+spec:
+  type: {{ $.Values.service.type }}
+  ports:
+    - port: {{ $.Values.service.grpc.port }}
+      targetPort: grpc
+      protocol: TCP
+      name: grpc
+  selector:
+    app: bigbang
+    version: {{ .tag }}
+    type: grpc
+{{- end }} 

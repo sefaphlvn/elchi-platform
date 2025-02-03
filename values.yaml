@@ -1,0 +1,23 @@
+global:
+  namespace: "elchi-platform"
+  apiUrl: "bigbang.elchi.io"
+  port: ""  # If empty, will use 80 for HTTP or 443 for HTTPS based on tlsEnabled
+  tlsEnabled: false
+  versions:
+    - tag: v0.1.0-v0.13.4-envoy1.33.0
+    - tag: v0.1.0-v0.13.4-envoy1.32.3
+  selfServiceMongo: true
+  mongodb:
+    hosts: ""
+    username: "elchi"
+    password: "elchi"
+    database: "elchi"
+    scheme: ""
+    port: ""
+    replicaset: ""
+    timeoutMs: ""
+    tlsEnabled: ""
+    authSource: ""
+  bigbang:
+    grpcDefaultReplicas: 3
+    restDefaultReplicas: 2

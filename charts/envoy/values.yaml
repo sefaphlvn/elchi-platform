@@ -1,0 +1,18 @@
+replicas: 4
+image:
+  repository: envoyproxy/envoy
+  tag: v1.33.0
+  pullPolicy: IfNotPresent
+
+service:
+  type: NodePort
+  httpPort: 30080
+  adminPort: 30081
+
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "256Mi"
+    cpu: "200m"

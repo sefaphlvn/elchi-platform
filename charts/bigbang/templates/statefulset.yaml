@@ -1,0 +1,128 @@
+{{- range .Values.global.versions }}
+---
+# REST StatefulSet
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  namespace: {{ $.Values.global.namespace }}
+  name: bigbang-rest-{{ .tag | replace "." "-" }}
+  labels:
+    app: bigbang
+    version: {{ .tag }}
+    type: rest
+spec:
+  serviceName: bigbang-rest-{{ .tag | replace "." "-" }}
+  replicas: {{ $.Values.global.bigbang.restDefaultReplicas }}
+  selector:
+    matchLabels:
+      app: bigbang
+      version: {{ .tag }}
+      type: rest
+  template:
+    metadata:
+      labels:
+        app: bigbang
+        version: {{ .tag }}
+        type: rest
+    spec:
+      {{- if $.Values.global.selfServiceMongo }}
+      initContainers:
+        - name: wait-for-mongodb
+          image: busybox:1.28
+          command: ['sh', '-c', 'until nc -z mongodb-service.{{ $.Values.global.namespace }} 27017; do echo waiting for mongodb; sleep 2; done;']
+      {{- end }}
+      containers:
+        - name: bigbang
+          image: "{{ $.Values.image.repository }}:{{ .tag }}"
+          imagePullPolicy: {{ $.Values.image.pullPolicy }}
+          args: ["server-rest"]
+          resources:
+            {{- toYaml $.Values.resources.rest | nindent 12 }}
+          ports:
+            - name: http
+              containerPort: {{ $.Values.service.rest.port }}
+              protocol: TCP
+          volumeMounts:
+            - name: config-volume
+              mountPath: /root/.configs
+          envFrom:
+            - configMapRef:
+                name: {{ $.Values.configMap.name }}
+          readinessProbe:
+            tcpSocket:
+              port: {{ $.Values.service.rest.port }}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: {{ $.Values.service.rest.port }}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ $.Values.configMap.name }}
+---
+# gRPC StatefulSet
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  namespace: {{ $.Values.global.namespace }}
+  name: bigbang-grpc-{{ .tag | replace "." "-" }}
+  labels:
+    app: bigbang
+    version: {{ .tag }}
+    type: grpc
+spec:
+  serviceName: bigbang-grpc-{{ .tag | replace "." "-" }}
+  replicas: {{ $.Values.global.bigbang.grpcDefaultReplicas }}
+  selector:
+    matchLabels:
+      app: bigbang
+      version: {{ .tag }}
+      type: grpc
+  template:
+    metadata:
+      labels:
+        app: bigbang
+        version: {{ .tag }}
+        type: grpc
+    spec:
+      {{- if $.Values.global.selfServiceMongo }}
+      initContainers:
+        - name: wait-for-mongodb
+          image: busybox:1.28
+          command: ['sh', '-c', 'until nc -z mongodb-service.{{ $.Values.global.namespace }} 27017; do echo waiting for mongodb; sleep 2; done;']
+      {{- end }}
+      containers:
+        - name: bigbang
+          image: "{{ $.Values.image.repository }}:{{ .tag }}"
+          imagePullPolicy: {{ $.Values.image.pullPolicy }}
+          args: ["server-grpc"]
+          resources:
+            {{- toYaml $.Values.resources.grpc | nindent 12 }}
+          ports:
+            - name: grpc
+              containerPort: {{ $.Values.service.grpc.port }}
+              protocol: TCP
+          volumeMounts:
+            - name: config-volume
+              mountPath: /root/.configs
+          envFrom:
+            - configMapRef:
+                name: {{ $.Values.configMap.name }}
+          readinessProbe:
+            tcpSocket:
+              port: {{ $.Values.service.grpc.port }}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: {{ $.Values.service.grpc.port }}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ $.Values.configMap.name }}
+{{- end }}

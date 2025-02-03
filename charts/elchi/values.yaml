@@ -1,0 +1,20 @@
+image:
+  repository: spehlivan/elchi
+  tag: v0.1.0
+  pullPolicy: IfNotPresent
+
+resources:
+  replicas: 3
+  requests:
+    memory: "256Mi"
+    cpu: "200m"
+  limits:
+    memory: "512Mi"
+    cpu: "300m"
+
+service:
+  type: ClusterIP
+  port: 80
+
+config:
+  enableDemo: "false"

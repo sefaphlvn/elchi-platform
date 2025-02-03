@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: elchi-config
+  namespace: {{ .Values.global.namespace }}
+data:
+  config.js: |
+    window.APP_CONFIG = {
+      API_URL: "{{- if .Values.global.tls.enabled }}https://{{- else }}http://{{- end }}{{ .Values.global.apiUrl }}{{- if and .Values.global.port (not (or (eq .Values.global.port 80) (eq .Values.global.port 443))) }}:{{ .Values.global.port }}{{- end }}",
+      API_URL_LOCAL: 'http://localhost:65190',
+      ENABLE_DEMO: false
+    };

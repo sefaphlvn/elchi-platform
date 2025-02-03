@@ -1,0 +1,14 @@
+{{- if not (lookup "v1" "Namespace" "" .Values.global.namespace) }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.global.namespace }}
+  labels:
+    name: {{ .Values.global.namespace }}
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    meta.helm.sh/release-name: elchi-platform
+    meta.helm.sh/release-namespace: {{ .Values.global.namespace }}
+    "helm.sh/hook-weight": "0"
+    helm.sh/hook: pre-install
+{{- end }} 

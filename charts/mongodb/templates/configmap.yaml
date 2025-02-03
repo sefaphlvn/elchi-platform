@@ -1,0 +1,17 @@
+{{- if .Values.global.selfServiceMongo }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mongodb-init
+  namespace: {{ $.Values.global.namespace }}
+data:
+  init.js: |
+    db.createUser({
+      user: {{ .Values.auth.username | quote }},
+      pwd: {{ .Values.auth.password | quote }},
+      roles: [
+        { role: "readWrite", db: {{ .Values.auth.database | quote }} },
+        { role: "dbAdmin", db: {{ .Values.auth.database | quote }} }
+      ]
+    });
+{{- end }}
