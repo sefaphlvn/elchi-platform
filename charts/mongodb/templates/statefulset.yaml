@@ -1,4 +1,4 @@
-{{- if .Values.global.selfServiceMongo }}
+{{- if .Values.global.installMongo }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -75,6 +75,9 @@ spec:
   volumeClaimTemplates:
     - metadata:
         name: mongodb-data
+        annotations:
+          "helm.sh/hook-delete-policy": before-hook-creation
+          "helm.sh/resource-policy": delete
       spec:
         accessModes: [ "ReadWriteOnce" ]
         storageClassName: {{ .Values.persistence.storageClass }}

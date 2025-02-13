@@ -1,20 +1,18 @@
-{{- if .Values.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
   name: envoy-service
   namespace: {{ .Values.global.namespace }}
 spec:
-  type: {{ .Values.service.type }}
+  type: ClusterIP
   ports:
-    - name: http
-      port: 8080
+    - port: 8080
       targetPort: 1989
-      nodePort: {{ .Values.service.httpPort }}
-    - name: admin
-      port: 9901
+      protocol: TCP
+      name: http
+    - port: 9901
       targetPort: 9901
-      nodePort: {{ .Values.service.adminPort }}
+      protocol: TCP
+      name: admin
   selector:
     app: envoy
-{{- end }} 

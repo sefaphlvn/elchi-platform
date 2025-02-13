@@ -4,28 +4,28 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
+  name: bigbang-rest-{{ regexReplaceAll "-arm64$" .tag "" | replace "." "-" }}
   namespace: {{ $.Values.global.namespace }}
-  name: bigbang-rest-{{ .tag | replace "." "-" }}
   labels:
     app: bigbang
-    version: {{ .tag }}
+    version: {{ regexReplaceAll "-arm64$" .tag "" }}
     type: rest
 spec:
-  serviceName: bigbang-rest-{{ .tag | replace "." "-" }}
+  serviceName: bigbang-rest-{{ regexReplaceAll "-arm64$" .tag "" | replace "." "-" }}-headless
   replicas: {{ $.Values.global.bigbang.restDefaultReplicas }}
   selector:
     matchLabels:
       app: bigbang
-      version: {{ .tag }}
+      version: {{ regexReplaceAll "-arm64$" .tag "" }}
       type: rest
   template:
     metadata:
       labels:
         app: bigbang
-        version: {{ .tag }}
+        version: {{ regexReplaceAll "-arm64$" .tag "" }}
         type: rest
     spec:
-      {{- if $.Values.global.selfServiceMongo }}
+      {{- if $.Values.global.installMongo }}
       initContainers:
         - name: wait-for-mongodb
           image: busybox:1.28
@@ -68,27 +68,27 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   namespace: {{ $.Values.global.namespace }}
-  name: bigbang-grpc-{{ .tag | replace "." "-" }}
+  name: bigbang-grpc-{{ regexReplaceAll "-arm64$" .tag "" | replace "." "-" }}
   labels:
     app: bigbang
-    version: {{ .tag }}
+    version: {{ regexReplaceAll "-arm64$" .tag "" }}
     type: grpc
 spec:
-  serviceName: bigbang-grpc-{{ .tag | replace "." "-" }}
+  serviceName: bigbang-grpc-{{ regexReplaceAll "-arm64$" .tag "" | replace "." "-" }}-headless
   replicas: {{ $.Values.global.bigbang.grpcDefaultReplicas }}
   selector:
     matchLabels:
       app: bigbang
-      version: {{ .tag }}
+      version: {{ regexReplaceAll "-arm64$" .tag "" }}
       type: grpc
   template:
     metadata:
       labels:
         app: bigbang
-        version: {{ .tag }}
+        version: {{ regexReplaceAll "-arm64$" .tag "" }}
         type: grpc
     spec:
-      {{- if $.Values.global.selfServiceMongo }}
+      {{- if $.Values.global.installMongo }}
       initContainers:
         - name: wait-for-mongodb
           image: busybox:1.28

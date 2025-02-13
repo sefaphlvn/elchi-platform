@@ -20,6 +20,7 @@ annotations:
   meta.helm.sh/release-name: elchi-platform
   meta.helm.sh/release-namespace: elchi-platform
   app.kubernetes.io/managed-by: Helm
+  artifacthub.io/create-namespace: "true"
   artifacthub.io/recommendations: |
     - url: https://artifacthub.io/packages/helm/bitnami/mongodb
       title: MongoDB (optional)

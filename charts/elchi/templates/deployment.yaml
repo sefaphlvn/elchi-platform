@@ -6,7 +6,7 @@ metadata:
   labels:
     app: elchi
 spec:
-  replicas: {{ .Values.resources.replicas }}
+  replicas: {{ .Values.replicas }}
   selector:
     matchLabels:
       app: elchi

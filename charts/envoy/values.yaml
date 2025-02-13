@@ -4,11 +4,6 @@ image:
   tag: v1.33.0
   pullPolicy: IfNotPresent
 
-service:
-  type: NodePort
-  httpPort: 30080
-  adminPort: 30081
-
 resources:
   requests:
     memory: "128Mi"

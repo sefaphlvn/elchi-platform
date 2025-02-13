@@ -1,4 +1,3 @@
-{{- if .Values.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -21,6 +20,7 @@ data:
               stream_idle_timeout: 0s
               stat_prefix: ingress_http
               codec_type: AUTO
+              use_remote_address: true
               route_config:
                 name: unified_route
                 virtual_hosts:
@@ -32,15 +32,15 @@ data:
                   - match:
                       prefix: "/"
                       headers:
-                      - name: "version"
-                        exact_match: {{ regexFind "envoy[0-9]+\\.[0-9]+\\.[0-9]+" $version.tag | replace "envoy" "v" }}
+                      - name: "envoy-version"
+                        exact_match: {{ regexFind "envoy[0-9]+\\.[0-9]+\\.[0-9]+" (regexReplaceAll "-arm64$" $version.tag "") | replace "envoy" "v" }}
                       - name: "nodeid"
                         present_match: true
                     route:
-                      cluster: grpc-cluster-{{ $version.tag | replace "." "-" }}
+                      cluster: grpc-cluster-{{ regexReplaceAll "-arm64$" $version.tag "" | replace "." "-" }}
                       hash_policy:
                       - header:
-                          header_name: "version"
+                          header_name: "envoy-version"
                         terminal: false
                       - header:
                           header_name: "nodeid"
@@ -49,10 +49,10 @@ data:
                   - match:
                       prefix: "/"
                       headers:
-                      - name: "version"
-                        exact_match: {{ regexFind "envoy[0-9]+\\.[0-9]+\\.[0-9]+" $version.tag | replace "envoy" "v" }}
+                      - name: "envoy-version"
+                        exact_match: {{ regexFind "envoy[0-9]+\\.[0-9]+\\.[0-9]+" (regexReplaceAll "-arm64$" $version.tag "") | replace "envoy" "v" }}
                     route:
-                      cluster: rest-cluster-{{ $version.tag | replace "." "-" }}
+                      cluster: rest-cluster-{{ regexReplaceAll "-arm64$" $version.tag "" | replace "." "-" }}
                   {{- end }}
                   # Route OPTIONS requests to default REST cluster
                   - match:
@@ -84,11 +84,22 @@ data:
                       start_time: "%START_TIME%"
                       method: "%REQ(:METHOD)%"
                       path: "%REQ(:PATH)%"
-                      version: "%REQ(version)%"
-                      nodeid: "%REQ(nodeid)%"
+                      protocol: "%PROTOCOL%"
                       response_code: "%RESPONSE_CODE%"
+                      response_flags: "%RESPONSE_FLAGS%"
+                      bytes_received: "%BYTES_RECEIVED%"
+                      bytes_sent: "%BYTES_SENT%"
+                      duration: "%DURATION%"
+                      upstream_service_time: "%RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)%"
                       upstream_cluster: "%UPSTREAM_CLUSTER%"
                       upstream_host: "%UPSTREAM_HOST%"
+                      version: "%REQ(version)%"
+                      nodeid: "%REQ(nodeid)%"
+                      x_forwarded_for: "%REQ(X-FORWARDED-FOR)%"
+                      user_agent: "%REQ(USER-AGENT)%"
+                      request_id: "%REQ(X-REQUEST-ID)%"
+                      authority: "%REQ(:AUTHORITY)%"
+                      upstream_transport_failure_reason: "%UPSTREAM_TRANSPORT_FAILURE_REASON%"
               http_filters:
               - name: envoy.filters.http.router
                 typed_config:
@@ -96,65 +107,99 @@ data:
       clusters:
       {{- range $version := .Values.global.versions }}
       # gRPC clusters
-      - name: grpc-cluster-{{ $version.tag | replace "." "-" }}
-        connect_timeout: 1s
+      - name: grpc-cluster-{{ regexReplaceAll "-arm64$" $version.tag "" | replace "." "-" }}
+        connect_timeout: 5s
         type: STRICT_DNS
         lb_policy: RING_HASH
+        dns_lookup_family: V4_ONLY
+        dns_refresh_rate: 5s
+        respect_dns_ttl: true
+        typed_extension_protocol_options:
+          envoy.extensions.upstreams.http.v3.HttpProtocolOptions:
+            '@type': type.googleapis.com/envoy.extensions.upstreams.http.v3.HttpProtocolOptions
+            explicit_http_config:
+              http2_protocol_options:
+                connection_keepalive:
+                  interval: 60s
+                  timeout: 3s
+        health_checks:
+          - timeout: 1s
+            interval: 5s
+            unhealthy_threshold: 3
+            healthy_threshold: 1
+            tcp_health_check: {}
         ring_hash_lb_config:
+          hash_function: MURMUR_HASH_2
           minimum_ring_size: 32768
           maximum_ring_size: 131072
         load_assignment:
-          cluster_name: grpc-cluster-{{ $version.tag | replace "." "-" }}
+          cluster_name: grpc-cluster-{{ regexReplaceAll "-arm64$" $version.tag "" | replace "." "-" }}
           endpoints:
           - lb_endpoints:
-            {{- $serviceName := printf "bigbang-grpc-%s" ($version.tag | replace "." "-") }}
+            {{- $serviceName := printf "bigbang-grpc-%s" (regexReplaceAll "-arm64$" $version.tag "" | replace "." "-") }}
             {{- range $i, $e := until (int $.Values.global.bigbang.grpcDefaultReplicas) }}
             - endpoint:
                 address:
                   socket_address:
-                    address: {{ $serviceName }}-{{ $i }}.{{ $serviceName }}.{{ $.Values.global.namespace }}.svc.cluster.local
-                    port_value: 8000
+                    # StatefulSet headless service formatı
+                    address: {{ $serviceName }}-{{ $i }}.{{ $serviceName }}-headless.{{ $.Values.global.namespace }}.svc.cluster.local
+                    port_value: 18000
             {{- end }}
-        typed_extension_protocol_options:
-          envoy.extensions.upstreams.http.v3.HttpProtocolOptions:
-            "@type": type.googleapis.com/envoy.extensions.upstreams.http.v3.HttpProtocolOptions
-            explicit_http_config:
-              http2_protocol_options: {}
       # REST clusters
-      - name: rest-cluster-{{ $version.tag | replace "." "-" }}
+      - name: rest-cluster-{{ regexReplaceAll "-arm64$" $version.tag "" | replace "." "-" }}
         connect_timeout: 1s
         type: STRICT_DNS
-        lb_policy: ROUND_ROBIN
+        lb_policy: RING_HASH
+        ring_hash_lb_config:
+          hash_function: MURMUR_HASH_2
+          minimum_ring_size: 32768
+          maximum_ring_size: 131072
+        health_checks:
+          - timeout: 1s
+            interval: 5s
+            unhealthy_threshold: 3
+            healthy_threshold: 1
+            tcp_health_check: {}
         load_assignment:
-          cluster_name: rest-cluster-{{ $version.tag | replace "." "-" }}
+          cluster_name: rest-cluster-{{ regexReplaceAll "-arm64$" $version.tag "" | replace "." "-" }}
           endpoints:
           - lb_endpoints:
-            {{- $serviceName := printf "bigbang-rest-%s" ($version.tag | replace "." "-") }}
+            {{- $serviceName := printf "bigbang-rest-%s" (regexReplaceAll "-arm64$" $version.tag "" | replace "." "-") }}
             {{- range $i, $e := until (int $.Values.global.bigbang.restDefaultReplicas) }}
             - endpoint:
                 address:
                   socket_address:
-                    address: {{ $serviceName }}-{{ $i }}.{{ $serviceName }}.{{ $.Values.global.namespace }}.svc.cluster.local
-                    port_value: 8000
+                    address: {{ $serviceName }}-{{ $i }}.{{ $serviceName }}-headless.{{ $.Values.global.namespace }}.svc.cluster.local
+                    port_value: 8099
             {{- end }}
       {{- end }}
-      # Varsayılan REST cluster
+      # REST cluster
       - name: rest-cluster-default
         connect_timeout: 1s
         type: STRICT_DNS
-        lb_policy: ROUND_ROBIN
+        lb_policy: RING_HASH
+        ring_hash_lb_config:
+          hash_function: MURMUR_HASH_2
+          minimum_ring_size: 32768
+          maximum_ring_size: 131072
+        health_checks:
+          - timeout: 1s
+            interval: 5s
+            unhealthy_threshold: 3
+            healthy_threshold: 1
+            tcp_health_check: {}
         load_assignment:
           cluster_name: rest-cluster-default
           endpoints:
           - lb_endpoints:
             {{- range $version := .Values.global.versions }}
-            {{- $serviceName := printf "bigbang-rest-%s" ($version.tag | replace "." "-") }}
+            {{- $serviceName := printf "bigbang-rest-%s" (regexReplaceAll "-arm64$" $version.tag "" | replace "." "-") }}
             {{- range $i, $e := until (int $.Values.global.bigbang.restDefaultReplicas) }}
             - endpoint:
                 address:
                   socket_address:
-                    address: {{ $serviceName }}-{{ $i }}.{{ $serviceName }}.{{ $.Values.global.namespace }}.svc.cluster.local
-                    port_value: 8000
+                    address: {{ $serviceName }}-{{ $i }}.{{ $serviceName }}-headless.{{ $.Values.global.namespace }}.svc.cluster.local
+                    port_value: 8099
             {{- end }}
             {{- end }}
       # Elchi Frontend cluster
@@ -162,6 +207,12 @@ data:
         connect_timeout: 1s
         type: STRICT_DNS
         lb_policy: ROUND_ROBIN
+        health_checks:
+          - timeout: 1s
+            interval: 5s
+            unhealthy_threshold: 3
+            healthy_threshold: 1
+            tcp_health_check: {}
         load_assignment:
           cluster_name: elchi-cluster
           endpoints:
@@ -177,4 +228,3 @@ data:
         socket_address:
           address: 0.0.0.0
           port_value: 9901
-{{- end }} 

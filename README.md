@@ -7,10 +7,10 @@ This repository contains Helm charts for deploying the Elchi Platform components
 | Parameter | Description | Default |
 |-----------|-------------|---------|
 | `global.namespace` | Namespace where all components will be deployed | `"elchi-platform"` |
-| `global.apiUrl` | Base URL for the all components | `"bigbang.elchi.io"` |
+| `global.mainURL` | Base URL for the all components | `"bigbang.elchi.io"` |
 | `global.port` | Port for the BigBang API. If empty, uses 80/443 based on TLS | `""` |
 | `global.tlsEnabled` | Whether to use HTTPS | `false` |
-| `global.selfServiceMongo` | Whether to use self-hosted MongoDB | `true` |
+| `global.installMongo` | Whether to use self-hosted MongoDB | `true` |
 | `global.versions` | List of BigBang versions to deploy | `[v0.1.0-v0.13.4-envoy1.33.0, v0.1.0-v0.13.4-envoy1.32.3]` |
 | `global.mongodb.*` | MongoDB connection settings | See MongoDB section |
 | `global.bigbang.grpcDefaultReplicas` | Default replicas for gRPC services | `3` |
@@ -97,10 +97,10 @@ You can override values:
 # Global Values
 global:
   namespace: "elchi-platform"
-  apiUrl: "your-domain.com"
+  mainURL: "your-domain.com"
   port: "443"
   tlsEnabled: true
-  selfServiceMongo: true
+  installMongo: true
   versions:
     - tag: v0.1.0-v0.13.4-envoy1.33.0
     - tag: v0.1.0-v0.13.4-envoy1.32.3

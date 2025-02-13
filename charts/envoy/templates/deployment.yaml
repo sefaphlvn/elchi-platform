@@ -1,4 +1,3 @@
-{{- if .Values.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -19,10 +18,14 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: ["/usr/local/bin/envoy"]
-          args: ["-c", "/etc/envoy/envoy.yaml"]
+          args:
+            - -c
+            - /etc/envoy/envoy.yaml
           ports:
             - containerPort: 1989
+              name: http
             - containerPort: 9901
+              name: admin
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
@@ -32,4 +35,3 @@ spec:
         - name: envoy-config
           configMap:
             name: envoy-config
-{{- end }} 
