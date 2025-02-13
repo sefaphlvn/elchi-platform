@@ -28,7 +28,7 @@ jobs:
       - name: 🚀 Deploy to GitHub Pages (gh-pages)
         uses: peaceiris/actions-gh-pages@v3
         with:
-          github_token: ${{ secrets.GH_TOKEN }}  # Özel token kullan
+          personal_token: ${{ secrets.GH_PAT }}  # Özel token kullan
           publish_dir: charts
           publish_branch: gh-pages
           keep_files: true
