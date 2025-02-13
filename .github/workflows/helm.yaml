@@ -11,10 +11,7 @@ jobs:
       - name: 📥 Checkout Repository
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Tüm geçmişi al, yoksa Chart.yaml eksik görünebilir
-
-      - name: 🔍 Debug - List Directory Contents
-        run: ls -la  # Hangi dosyaların olduğunu kontrol et
+          fetch-depth: 0  # Tüm geçmişi al
 
       - name: 🔧 Setup Helm
         uses: azure/setup-helm@v3
@@ -23,21 +20,30 @@ jobs:
 
       - name: 📦 Package Helm Chart
         run: |
-          mkdir -p charts
-          helm package . -d charts  # Eğer Chart.yaml başka bir klasördeyse, yolu düzelt
+          helm package .  # charts/ klasörü kullanmadan direkt paketle
+
+      - name: 🚀 Clone Existing gh-pages Branch
+        run: |
+          git fetch origin gh-pages || echo "No gh-pages branch yet"
+          git checkout gh-pages || git checkout --orphan gh-pages
+
+      - name: 🔄 Ensure .nojekyll and README.md Exist
+        run: |
+          touch .nojekyll
+          echo "# Elchi Platform Helm Repository" > README.md
 
       - name: 🔄 Merge Existing index.yaml (Keep Old Versions)
         run: |
-          if [ -f charts/index.yaml ]; then
-            helm repo index charts --merge charts/index.yaml --url https://sefaphlvn.github.io/elchi-platform/
+          if [ -f index.yaml ]; then
+            helm repo index . --merge index.yaml --url https://sefaphlvn.github.io/elchi-platform/
           else
-            helm repo index charts --url https://sefaphlvn.github.io/elchi-platform/
+            helm repo index . --url https://sefaphlvn.github.io/elchi-platform/
           fi
 
       - name: 🚀 Deploy to GitHub Pages (gh-pages)
         uses: peaceiris/actions-gh-pages@v3
         with:
           personal_token: ${{ secrets.GH_PAT }}
-          publish_dir: charts
+          publish_dir: .
           publish_branch: gh-pages
           keep_files: true
