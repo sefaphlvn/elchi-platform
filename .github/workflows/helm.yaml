@@ -16,14 +16,23 @@ jobs:
         with:
           version: v3.10.0
 
+      - name: 🚀 Clone Existing gh-pages Branch
+        run: |
+          git fetch origin gh-pages || echo "No gh-pages branch yet"
+          git checkout gh-pages || git checkout --orphan gh-pages
+
       - name: 📦 Package Helm Chart
         run: |
           mkdir -p charts
           helm package . -d charts
 
-      - name: 🔄 Update Helm Repository Index
+      - name: 🔄 Merge Existing index.yaml (Keep Old Versions)
         run: |
-          helm repo index charts --url https://sefaphlvn.github.io/elchi-platform/
+          if [ -f charts/index.yaml ]; then
+            helm repo index charts --merge charts/index.yaml --url https://sefaphlvn.github.io/elchi-platform/
+          else
+            helm repo index charts --url https://sefaphlvn.github.io/elchi-platform/
+          fi
 
       - name: 🚀 Deploy to GitHub Pages (gh-pages)
         uses: peaceiris/actions-gh-pages@v3
