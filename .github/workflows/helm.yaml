@@ -10,21 +10,21 @@ jobs:
     steps:
       - name: 📥 Checkout Repository
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Tüm geçmişi al, yoksa Chart.yaml eksik görünebilir
+
+      - name: 🔍 Debug - List Directory Contents
+        run: ls -la  # Hangi dosyaların olduğunu kontrol et
 
       - name: 🔧 Setup Helm
         uses: azure/setup-helm@v3
         with:
           version: v3.10.0
 
-      - name: 🚀 Clone Existing gh-pages Branch
-        run: |
-          git fetch origin gh-pages || echo "No gh-pages branch yet"
-          git checkout gh-pages || git checkout --orphan gh-pages
-
       - name: 📦 Package Helm Chart
         run: |
           mkdir -p charts
-          helm package . -d charts
+          helm package . -d charts  # Eğer Chart.yaml başka bir klasördeyse, yolu düzelt
 
       - name: 🔄 Merge Existing index.yaml (Keep Old Versions)
         run: |
@@ -37,7 +37,7 @@ jobs:
       - name: 🚀 Deploy to GitHub Pages (gh-pages)
         uses: peaceiris/actions-gh-pages@v3
         with:
-          personal_token: ${{ secrets.GH_PAT }}  # Özel token kullan
+          personal_token: ${{ secrets.GH_PAT }}
           publish_dir: charts
           publish_branch: gh-pages
           keep_files: true
