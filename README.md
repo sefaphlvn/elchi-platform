@@ -1,3 +1,5 @@
+[![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/elchi-platform)](https://artifacthub.io/packages/search?repo=elchi-platform)
+
 # Elchi Platform Helm Charts
 
 This repository contains Helm charts for deploying the Elchi Platform components.
