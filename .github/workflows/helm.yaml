@@ -1,7 +1,7 @@
-name: Manual Helm Chart Publish
+name: Helm Chart Publish
 
 on:
-  workflow_dispatch:  # Manuel çalıştırma için
+  workflow_dispatch:
 
 jobs:
   publish:
@@ -11,7 +11,7 @@ jobs:
       - name: 📥 Checkout Repository
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Tüm geçmişi al
+          fetch-depth: 0
 
       - name: 🔧 Setup Helm
         uses: azure/setup-helm@v3
@@ -20,7 +20,7 @@ jobs:
 
       - name: 📦 Package Helm Chart
         run: |
-          helm package .  # charts/ klasörü kullanmadan direkt paketle
+          helm package .
 
       - name: 🚀 Clone Existing gh-pages Branch
         run: |
