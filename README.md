@@ -88,10 +88,6 @@ This repository contains Helm charts for deploying the Elchi Platform components
 
 | Parameter | Description | Default |
 |-----------|-------------|---------|
-| `auth.rootPassword` | MongoDB root password | `"elchi"` |
-| `auth.username` | MongoDB username | `"elchi"` |
-| `auth.password` | MongoDB password | `"elchi"` |
-| `auth.database` | MongoDB database name | `"elchi"` |
 | `persistence.enabled` | Enable persistence | `true` |
 | `persistence.size` | PVC size | `"1Gi"` |
 | `persistence.storageClass` | PVC storage class | `"local-path"` |

@@ -34,8 +34,8 @@ spec:
               # Create Elchi user (as root)
               mongosh admin --eval '
                 db.createUser({
-                  user: {{ .Values.auth.username | quote }},
-                  pwd: {{ .Values.auth.password | quote }},
+                  user: {{ .Values.global.mongodb.username | quote }},
+                  pwd: {{ .Values.global.mongodb.password | quote }},
                   roles: [
                     { role: "root", db: "admin" }
                   ]
@@ -58,11 +58,11 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           env:
             - name: MONGO_INITDB_ROOT_PASSWORD
-              value: {{ .Values.auth.rootPassword | quote }}
+              value: {{ .Values.global.mongodb.password | quote }}
             - name: MONGO_INITDB_ROOT_USERNAME
               value: "root"
             - name: MONGO_INITDB_DATABASE
-              value: {{ .Values.auth.database | quote }}
+              value: {{ .Values.global.mongodb.database | quote }}
           volumeMounts:
             - name: mongodb-data
               mountPath: /data/db

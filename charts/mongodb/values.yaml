@@ -17,13 +17,6 @@ persistence:
   size: 1Gi
   storageClass: local-path
 
-auth:
-  rootPassword: elchi
-  username: elchi
-  password: elchi
-  database: elchi
-
 service:
   type: ClusterIP
   port: 27017
-
