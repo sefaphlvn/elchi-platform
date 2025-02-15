@@ -58,6 +58,7 @@ This repository contains Helm charts for deploying the Elchi Platform components
 
 | Parameter | Description | Default |
 |-----------|-------------|---------|
+| `replicas` | Number of Elchi replicas | `3` |
 | `image.repository` | Elchi image repository | `"spehlivan/elchi"` |
 | `image.tag` | Elchi image tag | `"latest"` |
 | `image.pullPolicy` | Image pull policy | `"IfNotPresent"` |
@@ -76,9 +77,6 @@ This repository contains Helm charts for deploying the Elchi Platform components
 | `image.repository` | Envoy image repository | `"envoyproxy/envoy"` |
 | `image.tag` | Envoy image tag | `"v1.33.0"` |
 | `image.pullPolicy` | Image pull policy | `"IfNotPresent"` |
-| `service.type` | Kubernetes service type | `"NodePort"` |
-| `service.httpPort` | HTTP port | `30080` |
-| `service.adminPort` | Admin port | `30081` |
 | `resources.requests.memory` | Memory request | `"128Mi"` |
 | `resources.requests.cpu` | CPU request | `"100m"` |
 | `resources.limits.memory` | Memory limit | `"256Mi"` |
@@ -110,108 +108,19 @@ You can override values:
 global:
   namespace: "elchi-platform"
   mainURL: "your-domain.com"
-  port: "443"
+  port: ""
   tlsEnabled: true
   installMongo: true
   versions:
     - tag: v0.1.0-v0.13.4-envoy1.33.0
     - tag: v0.1.0-v0.13.4-envoy1.32.3
   mongodb:
-    hosts: ""
-    username: "elchi"
-    password: "secure-password"
-    database: "elchi"
-  bigbang:
-    grpcDefaultReplicas: 3
-    restDefaultReplicas: 2
-
-# Elchi Chart Values
-elchi:
-  enabled: true
-  image:
-    repository: spehlivan/elchi
-    tag: latest
-    pullPolicy: IfNotPresent
-  service:
-    type: ClusterIP
-    port: 80
-  resources:
-    requests:
-      memory: "128Mi"
-      cpu: "100m"
-    limits:
-      memory: "256Mi"
-      cpu: "200m"
-  config:
-    logging:
-      level: "info"
-      formatter: "text"
-      reportCaller: "false"
-
-# BigBang Chart Values
-bigbang:
-  image:
-    repository: spehlivan/bigbang
-    pullPolicy: IfNotPresent
-  resources:
-    rest:
-      requests:
-        memory: "256Mi"
-        cpu: "150m"
-      limits:
-        memory: "512Mi"
-        cpu: "250m"
-    grpc:
-      requests:
-        memory: "256Mi"
-        cpu: "150m"
-      limits:
-        memory: "512Mi"
-        cpu: "250m"
-  service:
-    type: ClusterIP
-    rest:
-      port: 8099
-    grpc:
-      port: 18000
-  config:
-    logging:
-      level: "info"
-      formatter: "text"
-      reportCaller: "false"
-
-# Envoy Chart Values
-envoy:
-  enabled: true
-  replicas: 4
-  image:
-    repository: envoyproxy/envoy
-    tag: v1.33.0
-    pullPolicy: IfNotPresent
-  service:
-    type: NodePort
-    httpPort: 30080
-    adminPort: 30081
-  resources:
-    requests:
-      memory: "128Mi"
-      cpu: "100m"
-    limits:
-      memory: "256Mi"
-      cpu: "200m"
-
-# MongoDB Chart Values
-mongodb:
-  enabled: true
-  auth:
-    rootPassword: "elchi"
     username: "elchi"
     password: "elchi"
     database: "elchi"
-  persistence:
-    enabled: true
-    size: "1Gi"
-    storageClass: "local-path"
+  bigbang:
+    grpcDefaultReplicas: 1
+    restDefaultReplicas: 1
 ```
 
 This approach (complete structure) might be more readable when you need to override many values and want to keep the structure clear.
