@@ -218,7 +218,7 @@ mongodb:
     storageClass: "local-path"
 ```
 
-Both approaches are valid and will work the same way. The second approach (complete structure) might be more readable when you need to override many values and want to keep the structure clear.
+This approach (complete structure) might be more readable when you need to override many values and want to keep the structure clear.
 
 Then install/upgrade with:
 
