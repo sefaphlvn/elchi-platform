@@ -5,6 +5,7 @@ type: application
 version: 0.1.0
 appVersion: "v0.1.0"
 kubeVersion: ">=1.19.0-0"
+icon: "https://sefaphlvn.github.io/elchi-platform/logo.png"
 
 home: https://github.com/sefaphlvn/elchi-platform
 sources:
