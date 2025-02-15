@@ -4,6 +4,12 @@
 
 This repository contains Helm charts for deploying the Elchi Platform components.
 
+## Available Versions
+> Syntax: `<bigbangVersion>`-`<goControlPlaneVersion>`-`<envoyVersion>`
+
+- `v0.1.0-v0.13.4-envoy1.33.0`
+- `v0.1.0-v0.13.4-envoy1.32.3`
+
 ## Global Values
 
 | Parameter | Description | Default |
@@ -88,7 +94,7 @@ This repository contains Helm charts for deploying the Elchi Platform components
 ### Installation
 
 ```bash
-helm install elchi-platform .
+helm install my-elchi-platform elchi-platform/elchi-platform --version 0.1.0
 ```
 
 ### Configuration
@@ -209,7 +215,7 @@ Both approaches are valid and will work the same way. The second approach (compl
 Then install/upgrade with:
 
 ```bash
-helm install -f values.yaml elchi-platform .
+helm install -f values.yaml my-elchi-platform elchi-platform/elchi-platform
 # or
-helm upgrade -f values.yaml elchi-platform .
+helm upgrade -f values.yaml my-elchi-platform elchi-platform/elchi-platform
 ```
