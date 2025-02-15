@@ -15,14 +15,23 @@ This repository contains Helm charts for deploying the Elchi Platform components
 | Parameter | Description | Default |
 |-----------|-------------|---------|
 | `global.namespace` | Namespace where all components will be deployed | `"elchi-platform"` |
-| `global.mainURL` | Base URL for the all components | `"bigbang.elchi.io"` |
+| `global.mainURL` | Base URL for the all components | `""` |
 | `global.port` | Port for the BigBang API. If empty, uses 80/443 based on TLS | `""` |
 | `global.tlsEnabled` | Whether to use HTTPS | `false` |
 | `global.installMongo` | Whether to use self-hosted MongoDB | `true` |
 | `global.versions` | List of BigBang versions to deploy | `[v0.1.0-v0.13.4-envoy1.33.0, v0.1.0-v0.13.4-envoy1.32.3]` |
-| `global.mongodb.*` | MongoDB connection settings | See MongoDB section |
-| `global.bigbang.grpcDefaultReplicas` | Default replicas for gRPC services | `3` |
-| `global.bigbang.restDefaultReplicas` | Default replicas for REST services | `2` |
+| `global.mongodb.hosts` | MongoDB connection hosts (comma-separated for replica set) | `""` |
+| `global.mongodb.username` | MongoDB username | `"elchi"` |
+| `global.mongodb.password` | MongoDB password | `"elchi"` |
+| `global.mongodb.database` | MongoDB database name | `"elchi"` |
+| `global.mongodb.scheme` | Connection scheme (mongodb or mongodb+srv) | `""` |
+| `global.mongodb.port` | MongoDB connection port | `""` |
+| `global.mongodb.replicaset` | Replica set name (if using replica set) | `""` |
+| `global.mongodb.timeoutMs` | Connection timeout in milliseconds | `""` |
+| `global.mongodb.tlsEnabled` | Enable TLS connection to MongoDB | `""` |
+| `global.mongodb.authSource` | Authentication source database (e.g., admin) | `""` |
+| `global.bigbang.grpcDefaultReplicas` | Default replicas for gRPC services | `1` |
+| `global.bigbang.restDefaultReplicas` | Default replicas for REST services | `1` |
 
 ## BigBang Chart Values
 
@@ -54,7 +63,6 @@ This repository contains Helm charts for deploying the Elchi Platform components
 | `image.pullPolicy` | Image pull policy | `"IfNotPresent"` |
 | `service.type` | Kubernetes service type | `"ClusterIP"` |
 | `service.port` | Service port | `80` |
-| `resources.replicas` | Number of Elchi replicas | `3` |
 | `resources.requests.memory` | Memory request | `"128Mi"` |
 | `resources.requests.cpu` | CPU request | `"100m"` |
 | `resources.limits.memory` | Memory limit | `"256Mi"` |

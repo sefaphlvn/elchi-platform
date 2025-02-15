@@ -8,7 +8,7 @@ data:
     BIGBANG_ADDRESS: {{ .Values.global.mainURL | quote }}
     BIGBANG_PORT: {{ if .Values.global.port }}{{ .Values.global.port | quote }}{{ else if .Values.global.tlsEnabled }}"443"{{ else }}"80"{{ end }}
     BIGBANG_TLS_ENABLED: {{ .Values.global.tlsEnabled | quote }}
-    BIGBANG_ENABLE_DEMO: {{ .Values.config.enableDemo | quote }}
+    BIGBANG_ENABLE_DEMO: "false"
 
     {{- if .Values.global.installMongo }}
     # Self-service MongoDB configuration

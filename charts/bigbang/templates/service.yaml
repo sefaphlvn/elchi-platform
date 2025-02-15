@@ -22,7 +22,7 @@ spec:
     version: {{ regexReplaceAll "-arm64$" .tag "" }}
     type: rest
 ---
-# REST Service (dış erişim için)
+# REST Service (internal access)
 apiVersion: v1
 kind: Service
 metadata:
@@ -66,7 +66,7 @@ spec:
     version: {{ regexReplaceAll "-arm64$" .tag "" }}
     type: grpc
 ---
-# gRPC Service (dış erişim için)
+# gRPC Service (external access)
 apiVersion: v1
 kind: Service
 metadata:

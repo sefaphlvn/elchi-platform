@@ -29,7 +29,6 @@ configMap:
   name: bigbang-config
 
 config:
-  enableDemo: "false"
   logging:
     level: "info"
     formatter: "text"
