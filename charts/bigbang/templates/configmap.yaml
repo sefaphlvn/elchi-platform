@@ -9,6 +9,7 @@ data:
     BIGBANG_PORT: {{ if .Values.global.port }}{{ .Values.global.port | quote }}{{ else if .Values.global.tlsEnabled }}"443"{{ else }}"80"{{ end }}
     BIGBANG_TLS_ENABLED: {{ .Values.global.tlsEnabled | quote }}
     BIGBANG_ENABLE_DEMO: "false"
+    BIGBANG_VERSIONS: [{{- $versions := list }}{{- range .Values.global.versions }}{{- $envoyVersion := regexFind "envoy[0-9]+\\.[0-9]+\\.[0-9]+" .tag | replace "envoy" "v" }}{{- $versions = append $versions $envoyVersion }}{{- end }}{{- range $index, $version := $versions }}{{- if $index }}, {{ end }}'{{ $version }}'{{- end }}]
 
     {{- if .Values.global.installMongo }}
     # Self-service MongoDB configuration
