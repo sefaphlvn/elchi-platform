@@ -36,6 +36,8 @@ data:
     MONGODB_PORT: {{ default "27017" .Values.global.mongodb.port | quote }}
     MONGODB_TIMEOUTMS: {{ default "5000" .Values.global.mongodb.timeoutMs | quote }}
     MONGODB_TLS_ENABLED: {{ default "false" .Values.global.mongodb.tlsEnabled | quote }}
+    MONGODB_AUTH_SOURCE: {{ default "admin" .Values.global.mongodb.authSource | quote }}
+    MONGODB_AUTH_MECHANISM: {{ default "SCRAM-SHA-1" .Values.global.mongodb.authMechanism | quote }}
     {{- end }}
 
     LOG_LEVEL: {{ .Values.config.logging.level }}

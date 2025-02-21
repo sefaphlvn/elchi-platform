@@ -18,6 +18,7 @@ global:
     timeoutMs: ""
     tlsEnabled: ""
     authSource: ""
+    authMechanism: ""
   bigbang:
     grpcDefaultReplicas: 1
     restDefaultReplicas: 1
