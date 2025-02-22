@@ -12,35 +12,42 @@
                 },
                 "mainURL": {
                     "type": "string",
-                    "description": "Base URL for the all components"
+                    "description": "Base URL for the all components",
+                    "default": ""
                 },
                 "port": {
                     "type": "string",
-                    "description": "Port for the BigBang API. If empty, uses 80/443 based on TLS"
+                    "description": "Port for the BigBang API. If empty, uses 80/443 based on TLS",
+                    "default": ""
                 },
                 "tlsEnabled": {
-                    "type": "string",
+                    "type": "boolean",
                     "description": "Whether to use HTTPS",
-                    "default": "false"
+                    "default": false
                 },
                 "installMongo": {
-                    "type": "string",
+                    "type": "boolean",
                     "description": "Whether to use self-hosted MongoDB",
-                    "default": "true"
+                    "default": true
                 },
                 "versions": {
                     "type": "array",
                     "description": "List of BigBang versions to deploy",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "default": [
+                        "v0.1.0-v0.13.4-envoy1.33.0",
+                        "v0.1.0-v0.13.4-envoy1.32.3"
+                    ]
                 },
                 "mongodb": {
                     "type": "object",
                     "properties": {
                         "hosts": {
                             "type": "string",
-                            "description": "MongoDB connection hosts (comma-separated for replica set)"
+                            "description": "MongoDB connection hosts (comma-separated for replica set)",
+                            "default": ""
                         },
                         "username": {
                             "type": "string",
@@ -49,7 +56,63 @@
                         },
                         "password": {
                             "type": "string",
-                            "description": "MongoDB password"
+                            "description": "MongoDB password",
+                            "default": "elchi"
+                        },
+                        "database": {
+                            "type": "string",
+                            "description": "MongoDB database name",
+                            "default": "elchi"
+                        },
+                        "scheme": {
+                            "type": "string",
+                            "description": "MongoDB scheme",
+                            "default": ""
+                        },
+                        "port": {
+                            "type": "string",
+                            "description": "MongoDB port",
+                            "default": ""
+                        },
+                        "replicaset": {
+                            "type": "string",
+                            "description": "MongoDB replicaset",
+                            "default": ""
+                        },
+                        "timeoutMs": {
+                            "type": "string",
+                            "description": "MongoDB timeout",
+                            "default": ""
+                        },
+                        "tlsEnabled": {
+                            "type": "string",
+                            "description": "Whether to use TLS for MongoDB",
+                            "default": "false"
+                        },
+                        "authSource": {
+                            "type": "string",
+                            "description": "MongoDB auth source",
+                            "default": ""
+                        },
+                        "authMechanism": {
+                            "type": "string",
+                            "description": "MongoDB auth mechanism",
+                            "default": ""
+                        }
+                    }
+                },
+                "bigbang": {
+                    "type": "object",
+                    "properties": {
+                        "grpcDefaultReplicas": {
+                            "type": "integer",
+                            "description": "Default number of replicas for gRPC services",
+                            "default": 1
+                        },
+                        "restDefaultReplicas": {
+                            "type": "integer",
+                            "description": "Default number of replicas for REST services",
+                            "default": 1
                         }
                     }
                 }
