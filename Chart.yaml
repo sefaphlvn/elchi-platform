@@ -1,6 +1,6 @@
 apiVersion: v2
 name: elchi-platform
-description: Elchi Platform Helm chart
+description: Helm chart for deploying Elchi Platform components
 type: application
 version: 0.1.0
 appVersion: "v0.1.0"

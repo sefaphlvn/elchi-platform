@@ -20,6 +20,7 @@ jobs:
 
       - name: 📦 Package Helm Chart
         run: |
+          cp README.md ./
           helm package .
 
       - name: 🚀 Clone Existing gh-pages Branch
