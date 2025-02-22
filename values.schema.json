@@ -1,0 +1,59 @@
+{
+    "$schema": "https://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+        "global": {
+            "type": "object",
+            "properties": {
+                "namespace": {
+                    "type": "string",
+                    "description": "Namespace where all components will be deployed",
+                    "default": "elchi-platform"
+                },
+                "mainURL": {
+                    "type": "string",
+                    "description": "Base URL for the all components"
+                },
+                "port": {
+                    "type": "string",
+                    "description": "Port for the BigBang API. If empty, uses 80/443 based on TLS"
+                },
+                "tlsEnabled": {
+                    "type": "string",
+                    "description": "Whether to use HTTPS",
+                    "default": "false"
+                },
+                "installMongo": {
+                    "type": "string",
+                    "description": "Whether to use self-hosted MongoDB",
+                    "default": "true"
+                },
+                "versions": {
+                    "type": "array",
+                    "description": "List of BigBang versions to deploy",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "mongodb": {
+                    "type": "object",
+                    "properties": {
+                        "hosts": {
+                            "type": "string",
+                            "description": "MongoDB connection hosts (comma-separated for replica set)"
+                        },
+                        "username": {
+                            "type": "string",
+                            "description": "MongoDB username",
+                            "default": "elchi"
+                        },
+                        "password": {
+                            "type": "string",
+                            "description": "MongoDB password"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
