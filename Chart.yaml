@@ -30,6 +30,8 @@ annotations:
     - Helm 3.0.0+
     - At least 2 CPU cores and 4GB RAM per node
   artifacthub.io/valuesSchema: "true"
+  artifacthub.io/containsSecurityUpdates: "false"
+  artifacthub.io/readme: "true"
 
 dependencies:
   - name: elchi

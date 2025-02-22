@@ -1,3 +1,8 @@
+# Patterns to ignore when building packages.
+# This supports shell glob matching, relative path matching, and
+# negation (prefixed with !).
+
+.DS_Store
 # Common VCS dirs
 .git/
 .gitignore
@@ -12,16 +17,18 @@
 *.bak
 *.tmp
 *.orig
+*~
 
 # Various IDEs
 .project
 .idea/
 *.tmproj
 .vscode/
-*.sublime-*
+
+# Keep README.md
+!README.md
 
 # OS generated files
-.DS_Store
 .DS_Store?
 ._*
 .Spotlight-V100
