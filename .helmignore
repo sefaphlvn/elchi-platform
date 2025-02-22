@@ -12,13 +12,13 @@
 *.bak
 *.tmp
 *.orig
-*~
 
 # Various IDEs
 .project
 .idea/
 *.tmproj
 .vscode/
+*.sublime-*
 
 # OS generated files
 .DS_Store
@@ -28,12 +28,6 @@
 .Trashes
 ehthumbs.db
 Thumbs.db
-
-# Explicitly include these files
-!README.md
-!Chart.yaml
-!values.yaml
-!values.schema.json
 
 # Helm/Kubernetes
 *.pem
@@ -46,7 +40,6 @@ kubeconfig
 
 # Documentation
 *.png
-*.md
 
 # CI/CD
 .github/
