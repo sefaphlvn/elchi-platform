@@ -34,11 +34,23 @@
                     "type": "array",
                     "description": "List of BigBang versions to deploy",
                     "items": {
-                        "type": "string"
+                        "type": "object",
+                        "properties": {
+                            "tag": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "tag"
+                        ]
                     },
                     "default": [
-                        "v0.1.0-v0.13.4-envoy1.33.0",
-                        "v0.1.0-v0.13.4-envoy1.32.3"
+                        {
+                            "tag": "v0.1.0-v0.13.4-envoy1.33.0"
+                        },
+                        {
+                            "tag": "v0.1.0-v0.13.4-envoy1.32.3"
+                        }
                     ]
                 },
                 "mongodb": {
