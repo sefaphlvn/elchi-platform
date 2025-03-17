@@ -18,6 +18,8 @@ data:
             typed_config:
               "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
               stream_idle_timeout: 0s
+              common_http_protocol_options:
+                idle_timeout: 180s
               stat_prefix: ingress_http
               codec_type: AUTO
               use_remote_address: true
@@ -120,8 +122,8 @@ data:
             explicit_http_config:
               http2_protocol_options:
                 connection_keepalive:
-                  interval: 60s
-                  timeout: 3s
+                  interval: 30s
+                  timeout: 5s
         health_checks:
           - timeout: 1s
             interval: 5s
