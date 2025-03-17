@@ -132,3 +132,10 @@ helm install -f values.yaml my-elchi-platform elchi-platform/elchi-platform
 # or
 helm upgrade -f values.yaml my-elchi-platform elchi-platform/elchi-platform
 ```
+
+```bash
+helm install my-elchi-platform elchi-platform/elchi-platform \
+  --version 0.1.0 \
+  --set-string global.mainURL="elchi.example.com" \
+  --set-string global.port="23456"
+```
