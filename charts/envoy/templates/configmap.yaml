@@ -18,8 +18,6 @@ data:
             typed_config:
               "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
               stream_idle_timeout: 0s
-              common_http_protocol_options:
-                idle_timeout: 180s
               stat_prefix: ingress_http
               codec_type: AUTO
               use_remote_address: true
@@ -30,7 +28,6 @@ data:
                   domains: ["*"]
                   routes:
                   {{- range $version := .Values.global.versions }}
-                  # gRPC route based on Version and NodeID
                   - match:
                       prefix: "/"
                       headers:
@@ -47,16 +44,14 @@ data:
                       - header:
                           header_name: "nodeid"
                         terminal: true
-                  # REST route based on Version only
+                  {{- end }}
                   - match:
                       prefix: "/"
                       headers:
                       - name: "envoy-version"
-                        exact_match: {{ regexFind "envoy[0-9]+\\.[0-9]+\\.[0-9]+" (regexReplaceAll "-arm64$" $version.tag "") | replace "envoy" "v" }}
+                        present_match: true
                     route:
-                      cluster: rest-cluster-{{ regexReplaceAll "-arm64$" $version.tag "" | replace "." "-" }}
-                  {{- end }}
-                  # Route OPTIONS requests to default REST cluster
+                      cluster: rest-cluster-default
                   - match:
                       prefix: "/"
                       headers:
@@ -64,7 +59,6 @@ data:
                         exact_match: "OPTIONS"
                     route:
                       cluster: rest-cluster-default
-                  # Route to bigbang default if from-elchi: yes header exists
                   - match:
                       prefix: "/"
                       headers:
@@ -72,7 +66,6 @@ data:
                         exact_match: "yes"
                     route:
                       cluster: rest-cluster-default
-                  # Route to elchi if no headers present
                   - match:
                       prefix: "/"
                     route:
@@ -108,14 +101,11 @@ data:
                   "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
       clusters:
       {{- range $version := .Values.global.versions }}
-      # gRPC clusters
       - name: grpc-cluster-{{ regexReplaceAll "-arm64$" $version.tag "" | replace "." "-" }}
         connect_timeout: 5s
         type: STRICT_DNS
         lb_policy: RING_HASH
         dns_lookup_family: V4_ONLY
-        dns_refresh_rate: 5s
-        respect_dns_ttl: true
         typed_extension_protocol_options:
           envoy.extensions.upstreams.http.v3.HttpProtocolOptions:
             '@type': type.googleapis.com/envoy.extensions.upstreams.http.v3.HttpProtocolOptions
@@ -143,39 +133,11 @@ data:
             - endpoint:
                 address:
                   socket_address:
-                    # StatefulSet headless service formatı
                     address: {{ $serviceName }}-{{ $i }}.{{ $serviceName }}-headless.{{ $.Values.global.namespace }}.svc.cluster.local
                     port_value: 18000
             {{- end }}
-      # REST clusters
-      - name: rest-cluster-{{ regexReplaceAll "-arm64$" $version.tag "" | replace "." "-" }}
-        connect_timeout: 1s
-        type: STRICT_DNS
-        lb_policy: RING_HASH
-        ring_hash_lb_config:
-          hash_function: MURMUR_HASH_2
-          minimum_ring_size: 32768
-          maximum_ring_size: 131072
-        health_checks:
-          - timeout: 1s
-            interval: 5s
-            unhealthy_threshold: 3
-            healthy_threshold: 1
-            tcp_health_check: {}
-        load_assignment:
-          cluster_name: rest-cluster-{{ regexReplaceAll "-arm64$" $version.tag "" | replace "." "-" }}
-          endpoints:
-          - lb_endpoints:
-            {{- $serviceName := printf "bigbang-rest-%s" (regexReplaceAll "-arm64$" $version.tag "" | replace "." "-") }}
-            {{- range $i, $e := until (int $.Values.global.bigbang.restDefaultReplicas) }}
-            - endpoint:
-                address:
-                  socket_address:
-                    address: {{ $serviceName }}-{{ $i }}.{{ $serviceName }}-headless.{{ $.Values.global.namespace }}.svc.cluster.local
-                    port_value: 8099
-            {{- end }}
       {{- end }}
-      # REST cluster
+
       - name: rest-cluster-default
         connect_timeout: 1s
         type: STRICT_DNS
@@ -194,17 +156,12 @@ data:
           cluster_name: rest-cluster-default
           endpoints:
           - lb_endpoints:
-            {{- range $version := .Values.global.versions }}
-            {{- $serviceName := printf "bigbang-rest-%s" (regexReplaceAll "-arm64$" $version.tag "" | replace "." "-") }}
-            {{- range $i, $e := until (int $.Values.global.bigbang.restDefaultReplicas) }}
             - endpoint:
                 address:
                   socket_address:
-                    address: {{ $serviceName }}-{{ $i }}.{{ $serviceName }}-headless.{{ $.Values.global.namespace }}.svc.cluster.local
+                    address: bigbang-rest.{{ $.Values.global.namespace }}.svc.cluster.local
                     port_value: 8099
-            {{- end }}
-            {{- end }}
-      # Elchi Frontend cluster
+
       - name: elchi-cluster
         connect_timeout: 1s
         type: STRICT_DNS

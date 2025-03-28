@@ -1,48 +1,26 @@
+{{- $restVersion := regexReplaceAll "-arm64$" (index .Values.global.versions 0).tag "" }}
+# REST Service
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: {{ .Values.global.namespace }}
+  name: bigbang-rest
+  labels:
+    app: bigbang
+    version: {{ $restVersion }}
+    type: rest
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.rest.port }}
+      targetPort: {{ .Values.service.rest.port }}
+      protocol: TCP
+      name: http
+  selector:
+    app: bigbang
+    version: {{ $restVersion }}
+    type: rest
 {{- range .Values.global.versions }}
----
-# REST Headless Service
-apiVersion: v1
-kind: Service
-metadata:
-  namespace: {{ $.Values.global.namespace }}
-  name: bigbang-rest-{{ regexReplaceAll "-arm64$" .tag "" | replace "." "-" }}-headless
-  labels:
-    app: bigbang
-    version: {{ regexReplaceAll "-arm64$" .tag "" }}
-    type: rest
-spec:
-  clusterIP: None
-  ports:
-    - port: {{ $.Values.service.rest.port }}
-      targetPort: {{ $.Values.service.rest.port }}
-      protocol: TCP
-      name: http
-  selector:
-    app: bigbang
-    version: {{ regexReplaceAll "-arm64$" .tag "" }}
-    type: rest
----
-# REST Service (internal access)
-apiVersion: v1
-kind: Service
-metadata:
-  namespace: {{ $.Values.global.namespace }}
-  name: bigbang-rest-{{ regexReplaceAll "-arm64$" .tag "" | replace "." "-" }}
-  labels:
-    app: bigbang
-    version: {{ regexReplaceAll "-arm64$" .tag "" }}
-    type: rest
-spec:
-  type: {{ $.Values.service.type }}
-  ports:
-    - port: {{ $.Values.service.rest.port }}
-      targetPort: {{ $.Values.service.rest.port }}
-      protocol: TCP
-      name: http
-  selector:
-    app: bigbang
-    version: {{ regexReplaceAll "-arm64$" .tag "" }}
-    type: rest
 ---
 # gRPC Headless Service
 apiVersion: v1
@@ -88,4 +66,3 @@ spec:
     version: {{ regexReplaceAll "-arm64$" .tag "" }}
     type: grpc
 {{- end }}
----

@@ -1,0 +1,62 @@
+{{- $restVersion := regexReplaceAll "-arm64$" (index .Values.global.versions 0).tag "" }}
+# REST Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bigbang-rest
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: bigbang
+    version: {{ $restVersion }}
+    type: rest
+spec:
+  replicas: {{ .Values.global.bigbang.restDefaultReplicas }}
+  selector:
+    matchLabels:
+      app: bigbang
+      version: {{ $restVersion }}
+      type: rest
+  template:
+    metadata:
+      labels:
+        app: bigbang
+        version: {{ $restVersion }}
+        type: rest
+    spec:
+      {{- if .Values.global.installMongo }}
+      initContainers:
+        - name: wait-for-mongodb
+          image: busybox:1.28
+          command: ['sh', '-c', 'until nc -z mongodb-service.{{ .Values.global.namespace }} 27017; do echo waiting for mongodb; sleep 2; done;']
+      {{- end }}
+      containers:
+        - name: bigbang
+          image: "{{ .Values.image.repository }}:{{ (index .Values.global.versions 0).tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args: ["server-rest"]
+          resources:
+            {{- toYaml .Values.resources.rest | nindent 12 }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.rest.port }}
+              protocol: TCP
+          volumeMounts:
+            - name: config-volume
+              mountPath: /root/.configs
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.configMap.name }}
+          readinessProbe:
+            tcpSocket:
+              port: {{ .Values.service.rest.port }}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: {{ .Values.service.rest.port }}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ .Values.configMap.name }}

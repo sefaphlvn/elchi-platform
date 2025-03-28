@@ -4,7 +4,7 @@ global:
   port: ""  # If empty, will use 80 for HTTP or 443 for HTTPS based on tlsEnabled
   tlsEnabled: false
   versions:
-    - tag: v0.1.0-v0.13.4-envoy1.33.0
+    - tag: v0.1.0-v0.13.4-envoy1.33.2
     - tag: v0.1.0-v0.13.4-envoy1.32.3
   installMongo: true
   internalCommunication: true
@@ -22,4 +22,4 @@ global:
     authMechanism: ""
   bigbang:
     grpcDefaultReplicas: 1
-    restDefaultReplicas: 1
+    restDefaultReplicas: 3

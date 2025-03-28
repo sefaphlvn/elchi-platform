@@ -33,4 +33,3 @@ config:
     level: "info"
     formatter: "text"
     reportCaller: "false"
-
