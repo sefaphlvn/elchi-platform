@@ -1,0 +1,35 @@
+image:
+  repository: spehlivan/bigbang
+  pullPolicy: IfNotPresent
+
+resources:
+  rest:
+    requests:
+      memory: "256Mi"
+      cpu: "150m"
+    limits:
+      memory: "512Mi"
+      cpu: "250m"
+  grpc:
+    requests:
+      memory: "256Mi"
+      cpu: "150m"
+    limits:
+      memory: "512Mi"
+      cpu: "250m"
+
+service:
+  type: ClusterIP
+  rest:
+    port: 8099
+  grpc:
+    port: 18000
+
+configMap:
+  name: bigbang-config
+
+config:
+  logging:
+    level: "info"
+    formatter: "text"
+    reportCaller: "false"

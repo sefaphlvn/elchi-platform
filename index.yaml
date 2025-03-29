@@ -1,0 +1,53 @@
+apiVersion: v1
+entries:
+  elchi-platform:
+  - annotations:
+      app.kubernetes.io/managed-by: Helm
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/create-namespace: "true"
+      artifacthub.io/license: MIT
+      artifacthub.io/prerelease: "false"
+      artifacthub.io/readme: "true"
+      artifacthub.io/recommendations: |
+        - url: https://artifacthub.io/packages/helm/bitnami/mongodb
+          title: MongoDB (optional)
+      artifacthub.io/requirements: |
+        - Kubernetes 1.19+
+        - Helm 3.0.0+
+        - At least 2 CPU cores and 4GB RAM per node
+      artifacthub.io/valuesSchema: "true"
+      helm.sh/hook-weight: "0"
+      meta.helm.sh/release-name: elchi-platform
+      meta.helm.sh/release-namespace: elchi-platform
+    apiVersion: v2
+    appVersion: v0.1.0
+    created: "2025-03-29T08:27:23.274870749Z"
+    dependencies:
+    - name: elchi
+      repository: file://charts/elchi
+      version: 0.1.0
+    - name: bigbang
+      repository: file://charts/bigbang
+      version: 0.1.0
+    - name: envoy
+      repository: file://charts/envoy
+      version: 0.1.0
+    - name: mongodb
+      repository: file://charts/mongodb
+      version: 0.1.0
+    description: Helm chart for deploying Elchi Platform components
+    digest: b7139064ce9ec1793c507b0a5aac361ef16d2dddfea35e52b3b6e80f34890b5f
+    home: https://github.com/sefaphlvn/elchi-platform
+    icon: https://sefaphlvn.github.io/elchi-platform/logo.png
+    kubeVersion: '>=1.19.0-0'
+    maintainers:
+    - email: sefa.pehlivan@gmail.com
+      name: Sefa Pehlivan
+    name: elchi-platform
+    sources:
+    - https://github.com/sefaphlvn/elchi-platform
+    type: application
+    urls:
+    - https://sefaphlvn.github.io/elchi-platform/elchi-platform-0.1.0.tgz
+    version: 0.1.0
+generated: "2025-03-29T08:27:23.273788124Z"

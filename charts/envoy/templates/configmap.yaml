@@ -1,0 +1,189 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: envoy-config
+  namespace: {{ .Values.global.namespace }}
+data:
+  envoy.yaml: |
+    static_resources:
+      listeners:
+      - name: listener_0
+        address:
+          socket_address:
+            address: 0.0.0.0
+            port_value: 1989
+        filter_chains:
+        - filters:
+          - name: envoy.filters.network.http_connection_manager
+            typed_config:
+              "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+              stream_idle_timeout: 0s
+              stat_prefix: ingress_http
+              codec_type: AUTO
+              use_remote_address: true
+              route_config:
+                name: unified_route
+                virtual_hosts:
+                - name: backend_services
+                  domains: ["*"]
+                  routes:
+                  {{- range $version := .Values.global.versions }}
+                  - match:
+                      prefix: "/"
+                      headers:
+                      - name: "envoy-version"
+                        exact_match: {{ regexFind "envoy[0-9]+\\.[0-9]+\\.[0-9]+" (regexReplaceAll "-arm64$" $version.tag "") | replace "envoy" "v" }}
+                      - name: "nodeid"
+                        present_match: true
+                    route:
+                      cluster: grpc-cluster-{{ regexReplaceAll "-arm64$" $version.tag "" | replace "." "-" }}
+                      hash_policy:
+                      - header:
+                          header_name: "envoy-version"
+                        terminal: false
+                      - header:
+                          header_name: "nodeid"
+                        terminal: true
+                  {{- end }}
+                  - match:
+                      prefix: "/"
+                      headers:
+                      - name: "envoy-version"
+                        present_match: true
+                    route:
+                      cluster: rest-cluster-default
+                  - match:
+                      prefix: "/"
+                      headers:
+                      - name: ":method"
+                        exact_match: "OPTIONS"
+                    route:
+                      cluster: rest-cluster-default
+                  - match:
+                      prefix: "/"
+                      headers:
+                      - name: "from-elchi"
+                        exact_match: "yes"
+                    route:
+                      cluster: rest-cluster-default
+                  - match:
+                      prefix: "/"
+                    route:
+                      cluster: elchi-cluster
+              access_log:
+              - name: envoy.access_loggers.stdout
+                typed_config:
+                  "@type": type.googleapis.com/envoy.extensions.access_loggers.stream.v3.StdoutAccessLog
+                  log_format:
+                    json_format:
+                      start_time: "%START_TIME%"
+                      method: "%REQ(:METHOD)%"
+                      path: "%REQ(:PATH)%"
+                      protocol: "%PROTOCOL%"
+                      response_code: "%RESPONSE_CODE%"
+                      response_flags: "%RESPONSE_FLAGS%"
+                      bytes_received: "%BYTES_RECEIVED%"
+                      bytes_sent: "%BYTES_SENT%"
+                      duration: "%DURATION%"
+                      upstream_service_time: "%RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)%"
+                      upstream_cluster: "%UPSTREAM_CLUSTER%"
+                      upstream_host: "%UPSTREAM_HOST%"
+                      version: "%REQ(version)%"
+                      nodeid: "%REQ(nodeid)%"
+                      x_forwarded_for: "%REQ(X-FORWARDED-FOR)%"
+                      user_agent: "%REQ(USER-AGENT)%"
+                      request_id: "%REQ(X-REQUEST-ID)%"
+                      authority: "%REQ(:AUTHORITY)%"
+                      upstream_transport_failure_reason: "%UPSTREAM_TRANSPORT_FAILURE_REASON%"
+              http_filters:
+              - name: envoy.filters.http.router
+                typed_config:
+                  "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
+      clusters:
+      {{- range $version := .Values.global.versions }}
+      - name: grpc-cluster-{{ regexReplaceAll "-arm64$" $version.tag "" | replace "." "-" }}
+        connect_timeout: 5s
+        type: STRICT_DNS
+        lb_policy: RING_HASH
+        dns_lookup_family: V4_ONLY
+        typed_extension_protocol_options:
+          envoy.extensions.upstreams.http.v3.HttpProtocolOptions:
+            '@type': type.googleapis.com/envoy.extensions.upstreams.http.v3.HttpProtocolOptions
+            explicit_http_config:
+              http2_protocol_options:
+                connection_keepalive:
+                  interval: 30s
+                  timeout: 5s
+        health_checks:
+          - timeout: 1s
+            interval: 5s
+            unhealthy_threshold: 3
+            healthy_threshold: 1
+            tcp_health_check: {}
+        ring_hash_lb_config:
+          hash_function: MURMUR_HASH_2
+          minimum_ring_size: 32768
+          maximum_ring_size: 131072
+        load_assignment:
+          cluster_name: grpc-cluster-{{ regexReplaceAll "-arm64$" $version.tag "" | replace "." "-" }}
+          endpoints:
+          - lb_endpoints:
+            {{- $serviceName := printf "bigbang-grpc-%s" (regexReplaceAll "-arm64$" $version.tag "" | replace "." "-") }}
+            {{- range $i, $e := until (int $.Values.global.bigbang.grpcDefaultReplicas) }}
+            - endpoint:
+                address:
+                  socket_address:
+                    address: {{ $serviceName }}-{{ $i }}.{{ $serviceName }}-headless.{{ $.Values.global.namespace }}.svc.cluster.local
+                    port_value: 18000
+            {{- end }}
+      {{- end }}
+
+      - name: rest-cluster-default
+        connect_timeout: 1s
+        type: STRICT_DNS
+        lb_policy: RING_HASH
+        ring_hash_lb_config:
+          hash_function: MURMUR_HASH_2
+          minimum_ring_size: 32768
+          maximum_ring_size: 131072
+        health_checks:
+          - timeout: 1s
+            interval: 5s
+            unhealthy_threshold: 3
+            healthy_threshold: 1
+            tcp_health_check: {}
+        load_assignment:
+          cluster_name: rest-cluster-default
+          endpoints:
+          - lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address:
+                    address: bigbang-rest.{{ $.Values.global.namespace }}.svc.cluster.local
+                    port_value: 8099
+
+      - name: elchi-cluster
+        connect_timeout: 1s
+        type: STRICT_DNS
+        lb_policy: ROUND_ROBIN
+        health_checks:
+          - timeout: 1s
+            interval: 5s
+            unhealthy_threshold: 3
+            healthy_threshold: 1
+            tcp_health_check: {}
+        load_assignment:
+          cluster_name: elchi-cluster
+          endpoints:
+          - lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address:
+                    address: elchi.{{ $.Values.global.namespace }}.svc.cluster.local
+                    port_value: 80
+    admin:
+      access_log_path: /tmp/admin_access.log
+      address:
+        socket_address:
+          address: 0.0.0.0
+          port_value: 9901

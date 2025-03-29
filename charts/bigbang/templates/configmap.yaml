@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: {{ .Values.global.namespace }}
+  name: {{ .Values.configMap.name }}
+data:
+  config-prod.yaml: |
+    BIGBANG_ADDRESS: {{ .Values.global.mainURL | quote }}
+    BIGBANG_PORT: {{ if .Values.global.port }}{{ .Values.global.port | quote }}{{ else if .Values.global.tlsEnabled }}"443"{{ else }}"80"{{ end }}
+    BIGBANG_TLS_ENABLED: {{ .Values.global.tlsEnabled | quote }}
+    BIGBANG_ENABLE_DEMO: "false"
+    BIGBANG_VERSIONS: [{{- $versions := list }}{{- range .Values.global.versions }}{{- $envoyVersion := regexFind "envoy[0-9]+\\.[0-9]+\\.[0-9]+" .tag | replace "envoy" "v" }}{{- $versions = append $versions $envoyVersion }}{{- end }}{{- range $index, $version := $versions }}{{- if $index }}, {{ end }}'{{ $version }}'{{- end }}]
+    BIGBANG_INTERNAL_COMMUNICATION: {{ .Values.global.internalCommunication | quote }}
+    BIGBANG_INTERNAL_ADDRESS_PORT: "envoy-service.{{ .Values.global.namespace }}.svc.cluster.local:8080"
+
+    {{- if .Values.global.installMongo }}
+    # Self-service MongoDB configuration
+    MONGODB_HOSTS: "mongodb-service.{{ .Values.global.namespace }}"
+    MONGODB_USERNAME: {{ default "elchi" .Values.global.mongodb.username | quote }}
+    MONGODB_PASSWORD: {{ default "elchi" .Values.global.mongodb.password | quote }}
+    MONGODB_DATABASE: {{ default "elchi" .Values.global.mongodb.database | quote }}
+    MONGODB_SCHEME: "mongodb"
+    MONGODB_PORT: "27017"
+    MONGODB_TIMEOUTMS: "5000"
+    MONGODB_TLS_ENABLED: "false"
+    MONGODB_AUTH_SOURCE: "admin"
+    MONGODB_AUTH_MECHANISM: "SCRAM-SHA-1"
+    {{- else }}
+    # External MongoDB configuration
+    {{- if not .Values.global.mongodb.hosts }}
+    {{- fail "When installMongo is false, global.mongodb.hosts must be provided" }}
+    {{- end }}
+    MONGODB_HOSTS: {{ .Values.global.mongodb.hosts | quote }}
+    MONGODB_USERNAME: {{ .Values.global.mongodb.username | quote }}
+    MONGODB_PASSWORD: {{ .Values.global.mongodb.password | quote }}
+    MONGODB_DATABASE: {{ .Values.global.mongodb.database | quote }}
+    MONGODB_SCHEME: {{ default "mongodb" .Values.global.mongodb.scheme | quote }}
+    MONGODB_PORT: {{ default "27017" .Values.global.mongodb.port | quote }}
+    MONGODB_TIMEOUTMS: {{ default "5000" .Values.global.mongodb.timeoutMs | quote }}
+    MONGODB_TLS_ENABLED: {{ default "false" .Values.global.mongodb.tlsEnabled | quote }}
+    MONGODB_AUTH_SOURCE: {{ default "admin" .Values.global.mongodb.authSource | quote }}
+    MONGODB_AUTH_MECHANISM: {{ default "SCRAM-SHA-1" .Values.global.mongodb.authMechanism | quote }}
+    {{- end }}
+
+    LOG_LEVEL: {{ .Values.config.logging.level }}
+    LOG_FORMATTER: {{ .Values.config.logging.formatter }}
+    LOG_REPORTCALLER: {{ .Values.config.logging.reportCaller | quote }} 
