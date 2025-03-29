@@ -7,6 +7,7 @@ This repository contains Helm charts for deploying the Elchi Platform components
 ## Available Versions
 > Syntax: `<bigbangVersion>`-`<goControlPlaneVersion>`-`<envoyVersion>`
 
+- `v0.1.0-v0.13.4-envoy1.33.2`
 - `v0.1.0-v0.13.4-envoy1.33.0`
 - `v0.1.0-v0.13.4-envoy1.32.3`
 
@@ -112,7 +113,7 @@ global:
   tlsEnabled: true
   installMongo: true
   versions:
-    - tag: v0.1.0-v0.13.4-envoy1.33.0
+    - tag: v0.1.0-v0.13.4-envoy1.33.2
     - tag: v0.1.0-v0.13.4-envoy1.32.3
   mongodb:
     username: "elchi"

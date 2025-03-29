@@ -5,7 +5,6 @@ global:
   tlsEnabled: false
   versions:
     - tag: v0.1.0-v0.13.4-envoy1.33.2
-    - tag: v0.1.0-v0.13.4-envoy1.32.3
   installMongo: true
   internalCommunication: true
   mongodb:
